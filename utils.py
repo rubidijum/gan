@@ -178,7 +178,7 @@ class CatsDataset(Dataset):
 		if self.transform:
 			img = self.transform(img)
 			
-		print(img.shape)
+		#print(img.shape)
 			
 		return img
 		
