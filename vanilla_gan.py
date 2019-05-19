@@ -22,8 +22,15 @@ def train_discriminator(optimizer, real_data, fake_data, discriminator, generato
 		
 	optimizer.zero_grad()
 		
+	# D(X^(i))
+	# forward pass
 	prediction_real = discriminator(real_data)
-		
+	
+	# minimize loss function
+	# manually, this would require differentiating loss function
+	# and then updating weights by the appropriate amount,
+	# but this is taken care of with .backward()
+	# how much does real data differ from ones (real data class label)
 	error_real = loss(prediction_real, real_data_labels(real_data.size(0)))
 	error_real.backward()
 		
@@ -75,12 +82,15 @@ if __name__ == "__main__":
 	#summary(discriminator, (1,4096))
 	#summary(generator, (1,100))
 	
+	#TODO: change to sgd in order to follow original Goodfellow paper
 	d_optimizer = optim.Adam(discriminator.parameters(), lr=0.00002)
 	g_optimizer = optim.Adam(generator.parameters(), lr=0.00002)
 	
+	# used in Goodfellow paper
 	loss = nn.BCELoss()
 	
 	# TODO: test me out -> random search	
+	# used in Goodfellow paper
 	d_steps = 1
 	num_epochs = 100
 	
