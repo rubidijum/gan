@@ -124,11 +124,11 @@ if __name__ == "__main__":
 			generator_loss.append(g_error)
 
 			# Display Progress
-			if (n_batch) % 50 == 0 or (n_batch) < 50:
+			if (n_batch) % 50 == 0 and (n_batch) > 50:
 				utils.display.clear_output(True)
 				
 				utils.plt.plot(discriminator_loss, label = 'D_error')
-				utils.plt.plot(discriminator_loss, label = 'G_error')
+				utils.plt.plot(generator_loss, label = 'G_error')
 				utils.plt.legend()
 				utils.plt.show()
 				
