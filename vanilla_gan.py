@@ -98,7 +98,7 @@ if __name__ == "__main__":
 	test_noise = networks.noise(num_test_samples)
 
 
-	logger = utils.Logger(model_name='VGAN', data_name='MNIST')
+	logger = utils.Logger(model_name='VGAN', data_name='Cats')
 
 	discriminator_loss = []
 	generator_loss = []
@@ -109,14 +109,10 @@ if __name__ == "__main__":
 			# 1. Train Discriminator
 			
 			real_data = Variable(networks.images_to_vectors(real_batch))
-			#print(real_data[0].shape)
-			#real_data_show = real_data[0].reshape(3,64,64)
-			#utils.plt.imshow(real_data_show.permute(1,2,0))
-			#utils.plt.show()
-			#if torch.cuda.is_available(): real_data = real_data.cuda()
+			
 			# Generate fake data
 			fake_data = generator(networks.noise(real_data.size(0))).detach()
-			#print(fake_data.shape)
+			
 			# Train D
 			d_error, d_pred_real, d_pred_fake = train_discriminator(d_optimizer,
 																	real_data, fake_data, discriminator, generator, loss)
