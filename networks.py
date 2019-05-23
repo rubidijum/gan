@@ -17,6 +17,17 @@ class DiscriminatorNet(torch.nn.Module):
 		n_features = 4096
 		n_out = 1
 		
+                """
+                self.conv1 = torch.nn.Conv2d(in_channels=3, out_channels=18, kernel=3, stride=1, padding=1)
+                self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
+
+                #brojke jos moraju da se nameste
+                self.fc1 = torch.nn.Linear(18 * 16 * 16, 64)
+
+                # 2. argument je broj klasa
+                self.fc2 = torch.nn.Linear(64, 2)
+                """
+
 		self.hidden0 = nn.Sequential(
 			nn.Linear(n_features, 2048),
 			nn.LeakyReLU(0.2),
