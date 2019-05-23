@@ -1,5 +1,5 @@
 import utils
-import networks
+import networks_improve
 
 import torch 
 from torch import nn, optim
@@ -10,12 +10,13 @@ from torchsummary import summary
 
 batchSize = 100
 
+# Label smoothing
 def real_data_labels(size):
-	data = Variable(torch.ones(size, 1))
+	data = Variable(torch.empty(size, 1).uniform_(0.7,1.2))
 	return data
 	
 def fake_data_labels(size):
-	data = Variable(torch.zeros(size, 1))
+	data = Variable(torch.empty(size, 1).uniform_(0.0,0.3))
 	return data
 		
 def train_discriminator(optimizer, real_data, fake_data, discriminator, generator, loss):
@@ -65,7 +66,8 @@ if __name__ == "__main__":
 	cat_data = utils.CatsDataset("./data/cats", transforms.Compose(
 										[ transforms.Grayscale(num_output_channels=1),
 										  transforms.ToTensor(),
-										  transforms.Normalize((.5,), (.5,))										  
+										  transforms.Normalize((.5,), (.5,)),
+										  transforms.Resize()										  
 										])
 						  )
 						  
@@ -79,8 +81,6 @@ if __name__ == "__main__":
 	discriminator = networks.DiscriminatorNet()
 	generator = networks.GeneratorNet()
 	
-	#summary(discriminator, (1,4096))
-	#summary(generator, (1,100))
 	
 	#TODO: change to sgd in order to follow original Goodfellow paper
 	d_optimizer = optim.Adam(discriminator.parameters(), lr=0.00002)
@@ -98,7 +98,7 @@ if __name__ == "__main__":
 	test_noise = networks.noise(num_test_samples)
 
 
-	logger = utils.Logger(model_name='VGAN', data_name='Cats')
+	logger = utils.Logger(model_name='GAN_improve', data_name='Cats')
 
 	discriminator_loss = []
 	generator_loss = []
@@ -131,36 +131,34 @@ if __name__ == "__main__":
 
 			# Display Progress
 			if (n_batch) % 50 == 0 and (n_batch) > 50:
-                                """
 				utils.display.clear_output(True)
 				
 				utils.plt.plot(discriminator_loss, label = 'D_error')
 				utils.plt.plot(generator_loss, label = 'G_error')
 				utils.plt.legend()
 				utils.plt.show()
-                                """
 				
-                                fig = utils.plt.figure(figsize=(8,2))
-                                cols = 8
-                                rows = 2
+				fig = utils.plt.figure(figsize=(8,2))
+				cols = 8
+				rows = 2
 				
 				
 				# Display Images
-                                test_images = networks.vectors_to_images(generator(test_noise)).data.cpu()
-
-                                """
+				test_images = networks.vectors_to_images(generator(test_noise)).data.cpu()
+				
 				for i in range(1, cols*rows):
 					img = test_images[i]
 					fig.add_subplot(rows, cols, i)
 					utils.plt.imshow(img.permute(1,2,0).squeeze(), cmap='gray')
 				utils.plt.show()
-                                """
+					
 				
-                                logger.log_images(test_images, num_test_samples, epoch, n_batch, num_batches);
-                                # Display status Logs
-                                logger.display_status(
+				logger.log_images(test_images, num_test_samples, epoch, n_batch, num_batches);
+				# Display status Logs
+				logger.display_status(
 					epoch, num_epochs, n_batch, num_batches,
 					d_error, g_error, d_pred_real, d_pred_fake
 				)
 			# Model Checkpoints
 			logger.save_models(generator, discriminator, epoch)
+
