@@ -1,5 +1,6 @@
 import utils
 import networks_improve
+import minibatch_discrimination
 
 import torch 
 from torch import nn, optim
@@ -12,11 +13,15 @@ batchSize = 100
 
 # Label smoothing
 def real_data_labels(size):
-	data = Variable(torch.empty(size, 1).uniform_(0.7,1.2))
+	data = Variable(torch.ones(size, 1))
 	return data
 	
 def fake_data_labels(size):
-	data = Variable(torch.empty(size, 1).uniform_(0.0,0.3))
+	data = Variable(torch.zeros(size, 1))
+	return data
+	
+def real_data_labels_G(size):
+	data = Variable(torch.ones(size,1))
 	return data
 		
 def train_discriminator(optimizer, real_data, fake_data, discriminator, generator, loss):
@@ -32,12 +37,12 @@ def train_discriminator(optimizer, real_data, fake_data, discriminator, generato
 	# and then updating weights by the appropriate amount,
 	# but this is taken care of with .backward()
 	# how much does real data differ from ones (real data class label)
-	error_real = loss(prediction_real, real_data_labels(real_data.size(0)))
+	error_real = loss(prediction_real, Variable(0.9*torch.ones(real_data.size(0))))
 	error_real.backward()
 		
 	prediction_fake = discriminator(fake_data)
 		
-	error_fake = loss(prediction_fake, fake_data_labels(fake_data.size(0)))
+	error_fake = loss(prediction_fake, Variable(0.1*torch.ones(real_data.size(0))))
 	error_fake.backward()
 		
 	optimizer.step()
@@ -51,7 +56,7 @@ def train_generator(optimizer, fake_data):
 	prediction = discriminator(fake_data)
 	
 	# we want data to be classified as real
-	error = loss(prediction, real_data_labels(prediction.size(0)))
+	error = loss(prediction, Variable(0.9*torch.ones(real_data.size(0))))
 	error.backward()
 	
 	optimizer.step()
@@ -65,9 +70,11 @@ if __name__ == "__main__":
 	#TODO: normalize with mean and stddev
 	cat_data = utils.CatsDataset("./data/cats", transforms.Compose(
 										[ transforms.Grayscale(num_output_channels=1),
+										  transforms.Resize((32,32)),		
 										  transforms.ToTensor(),
-										  transforms.Normalize((.5,), (.5,)),
-										  transforms.Resize()										  
+										  transforms.Normalize((.5,), (.5,))
+										  
+										  
 										])
 						  )
 						  
@@ -78,11 +85,11 @@ if __name__ == "__main__":
 	# Get the number of sampled batches
 	num_batches = len(data_loader)
 	
-	discriminator = networks.DiscriminatorNet()
-	generator = networks.GeneratorNet()
+	discriminator = networks_improve.DiscriminatorNet()
+	generator = networks_improve.GeneratorNet()
 	
 	
-	#TODO: change to sgd in order to follow original Goodfellow paper
+	#TODO: change to sgd for D in order to follow original Goodfellow paper
 	d_optimizer = optim.Adam(discriminator.parameters(), lr=0.00002)
 	g_optimizer = optim.Adam(generator.parameters(), lr=0.00002)
 	
@@ -95,7 +102,7 @@ if __name__ == "__main__":
 	num_epochs = 100
 	
 	num_test_samples = 16
-	test_noise = networks.noise(num_test_samples)
+	test_noise = networks_improve.noise(num_test_samples)
 
 
 	logger = utils.Logger(model_name='GAN_improve', data_name='Cats')
@@ -108,10 +115,10 @@ if __name__ == "__main__":
 
 			# 1. Train Discriminator
 			
-			real_data = Variable(networks.images_to_vectors(real_batch))
+			real_data = Variable(networks_improve.images_to_vectors(real_batch))
 			
 			# Generate fake data
-			fake_data = generator(networks.noise(real_data.size(0))).detach()
+			fake_data = generator(networks_improve.noise(real_data.size(0))).detach()
 			
 			# Train D
 			d_error, d_pred_real, d_pred_fake = train_discriminator(d_optimizer,
@@ -121,7 +128,7 @@ if __name__ == "__main__":
 
 			# 2. Train Generator
 			# Generate fake data
-			fake_data = generator(networks.noise(real_batch.size(0)))
+			fake_data = generator(networks_improve.noise(real_batch.size(0)))
 			# Train G
 			g_error = train_generator(g_optimizer, fake_data)
 			# Log error
@@ -133,24 +140,24 @@ if __name__ == "__main__":
 			if (n_batch) % 50 == 0 and (n_batch) > 50:
 				utils.display.clear_output(True)
 				
-				utils.plt.plot(discriminator_loss, label = 'D_error')
-				utils.plt.plot(generator_loss, label = 'G_error')
-				utils.plt.legend()
-				utils.plt.show()
+				#utils.plt.plot(discriminator_loss, label = 'D_error')
+				#utils.plt.plot(generator_loss, label = 'G_error')
+				#utils.plt.legend()
+				#utils.plt.show()
 				
-				fig = utils.plt.figure(figsize=(8,2))
-				cols = 8
-				rows = 2
+				#fig = utils.plt.figure(figsize=(8,2))
+				#cols = 8
+				#rows = 2
 				
 				
 				# Display Images
-				test_images = networks.vectors_to_images(generator(test_noise)).data.cpu()
+				test_images = networks_improve.vectors_to_images(generator(test_noise)).data.cpu()
 				
-				for i in range(1, cols*rows):
-					img = test_images[i]
-					fig.add_subplot(rows, cols, i)
-					utils.plt.imshow(img.permute(1,2,0).squeeze(), cmap='gray')
-				utils.plt.show()
+				#for i in range(1, cols*rows):
+				#	img = test_images[i]
+				#	fig.add_subplot(rows, cols, i)
+				#	utils.plt.imshow(img.permute(1,2,0).squeeze(), cmap='gray')
+				#utils.plt.show()
 					
 				
 				logger.log_images(test_images, num_test_samples, epoch, n_batch, num_batches);
