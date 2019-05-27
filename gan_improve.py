@@ -11,7 +11,9 @@ from torchsummary import summary
 
 batchSize = 100
 
-# Label smoothing
+def smooth_labels(labels, offset):
+	return labels + offset
+
 def real_data_labels(size):
 	data = Variable(torch.ones(size, 1))
 	return data
@@ -20,9 +22,6 @@ def fake_data_labels(size):
 	data = Variable(torch.zeros(size, 1))
 	return data
 	
-def real_data_labels_G(size):
-	data = Variable(torch.ones(size,1))
-	return data
 		
 def train_discriminator(optimizer, real_data, fake_data, discriminator, generator, loss):
 		
@@ -37,12 +36,14 @@ def train_discriminator(optimizer, real_data, fake_data, discriminator, generato
 	# and then updating weights by the appropriate amount,
 	# but this is taken care of with .backward()
 	# how much does real data differ from ones (real data class label)
-	error_real = loss(prediction_real, Variable(0.9*torch.ones(real_data.size(0))))
+	
+	# One sided label smoothing (Salimans et. al, 2016)
+	error_real = loss(prediction_real, smooth_labels(real_data_labels(real_data.size(0)),-0.1))
 	error_real.backward()
 		
 	prediction_fake = discriminator(fake_data)
 		
-	error_fake = loss(prediction_fake, Variable(0.1*torch.ones(real_data.size(0))))
+	error_fake = loss(prediction_fake, fake_data_labels(fale_data.size(0)))
 	error_fake.backward()
 		
 	optimizer.step()
@@ -90,6 +91,7 @@ if __name__ == "__main__":
 	
 	
 	#TODO: change to sgd for D in order to follow original Goodfellow paper
+	#TODO: experiment with learning rates
 	d_optimizer = optim.Adam(discriminator.parameters(), lr=0.00002)
 	g_optimizer = optim.Adam(generator.parameters(), lr=0.00002)
 	
@@ -99,6 +101,7 @@ if __name__ == "__main__":
 	# TODO: test me out -> random search	
 	# used in Goodfellow paper
 	d_steps = 1
+	
 	num_epochs = 100
 	
 	num_test_samples = 16
@@ -115,6 +118,7 @@ if __name__ == "__main__":
 
 			# 1. Train Discriminator
 			
+			#generate real data
 			real_data = Variable(networks_improve.images_to_vectors(real_batch))
 			
 			# Generate fake data
@@ -126,15 +130,22 @@ if __name__ == "__main__":
 			
 			discriminator_loss.append(d_error)
 
+			# =========================================
+
 			# 2. Train Generator
+			
 			# Generate fake data
 			fake_data = generator(networks_improve.noise(real_batch.size(0)))
+			
 			# Train G
 			g_error = train_generator(g_optimizer, fake_data)
+			
+			generator_loss.append(g_error)
+			
+			# =========================================
+			
 			# Log error
 			logger.log(d_error, g_error, epoch, n_batch, num_batches)
-
-			generator_loss.append(g_error)
 
 			# Display Progress
 			if (n_batch) % 50 == 0 and (n_batch) > 50:
