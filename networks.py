@@ -5,6 +5,10 @@ from torch import nn, optim
 from torch.autograd.variable import Variable
 from torchvision import transforms, datasets
 
+IMG_WIDTH = 64
+IMG_HEIGHT = 64
+IMG_RESOLUTION = IMG_WIDTH*IMG_HEIGHT
+
 class DiscriminatorNet(torch.nn.Module):
 	
 	"""
@@ -14,7 +18,7 @@ class DiscriminatorNet(torch.nn.Module):
 	def __init__(self):
 		super().__init__()
 		
-		n_features = 4096
+		n_features = IMG_RESOLUTION
 		n_out = 1
 		
                 """
@@ -67,10 +71,10 @@ class DiscriminatorNet(torch.nn.Module):
 		return x
 		
 def images_to_vectors(images):
-	return images.view(images.size(0), 4096)
+	return images.view(images.size(0), IMG_RESOLUTION)
 	
 def vectors_to_images(vectors):
-	return vectors.view(vectors.size(0), 1, 64, 64)
+	return vectors.view(vectors.size(0), 1, IMG_WIDTH, IMG_HEIGHT)
 	
 class GeneratorNet(torch.nn.Module):
 	
@@ -78,7 +82,7 @@ class GeneratorNet(torch.nn.Module):
 	def __init__(self):
 		super().__init__()
 		n_features = 100
-		n_out = 4096
+		n_out = IMG_RESOLUTION
 		
 		self.hidden0 = nn.Sequential(
 			nn.Linear(n_features, 256),
