@@ -1,7 +1,7 @@
 import utils
 
 import torch 
-import torchgan
+from torchgan.layers import MinibatchDiscrimination1d
 from torch import nn, optim
 from torch.autograd.variable import Variable
 from torchvision import transforms, datasets
@@ -28,12 +28,12 @@ class DiscriminatorNet(torch.nn.Module):
 			nn.Dropout(0.3)
 		)
 		self.minibatch_disc0 = nn.Sequential(
-			nn.MinibatchDiscrimination1d(2048, 1024),
+		        MinibatchDiscrimination1d(2048, 1024),
 			nn.LeakyReLU(0.2),
 			nn.Dropout(0.3)
 		)
 		self.hidden1 = nn.Sequential(
-			nn.Linear(1024, 512),
+			nn.Linear(2048+1024, 512),
 			nn.LeakyReLU(0.2),
 			nn.Dropout(0.3)
 		)
