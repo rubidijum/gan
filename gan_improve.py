@@ -43,7 +43,7 @@ def train_discriminator(optimizer, real_data, fake_data, discriminator, generato
 		
 	prediction_fake = discriminator(fake_data)
 		
-	error_fake = loss(prediction_fake, fake_data_labels(fale_data.size(0)))
+	error_fake = loss(prediction_fake, fake_data_labels(fake_data.size(0)))
 	error_fake.backward()
 		
 	optimizer.step()

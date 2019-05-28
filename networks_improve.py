@@ -1,6 +1,7 @@
 import utils
 
 import torch 
+import torchgan
 from torch import nn, optim
 from torch.autograd.variable import Variable
 from torchvision import transforms, datasets
@@ -26,18 +27,18 @@ class DiscriminatorNet(torch.nn.Module):
 			nn.LeakyReLU(0.2),
 			nn.Dropout(0.3)
 		)
-		self.hidden1 = nn.Sequential(
-			nn.Linear(2048, 1024),
+		self.minibatch_disc0 = nn.Sequential(
+			nn.MinibatchDiscrimination1d(2048, 1024),
 			nn.LeakyReLU(0.2),
 			nn.Dropout(0.3)
 		)
-		self.hidden2 = nn.Sequential(
+		self.hidden1 = nn.Sequential(
 			nn.Linear(1024, 512),
 			nn.LeakyReLU(0.2),
 			nn.Dropout(0.3)
 		)
 		
-		self.hidden3 = nn.Sequential(
+		self.hidden2 = nn.Sequential(
 			nn.Linear(512, 256),
 			nn.LeakyReLU(0.2),
 			nn.Dropout(0.3)
@@ -53,9 +54,9 @@ class DiscriminatorNet(torch.nn.Module):
 	
 	def forward(self, x):
 		x = self.hidden0(x) 
+		x = self.minibatch_disc0(x) 
 		x = self.hidden1(x) 
-		x = self.hidden2(x) 
-		x = self.hidden3(x)  
+		x = self.hidden2(x)  
 		x = self.out(x) 
 		return x
 		

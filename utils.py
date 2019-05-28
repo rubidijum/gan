@@ -130,18 +130,18 @@ class Logger:
 		torch.save(discriminator.state_dict(),
 				   '{}/D_epoch_{}'.format(out_dir, epoch))
 
-        def load_models(self, gen_model, discr_model):
-                device = torch.device("cuda")
-                discr_dir = './data/models/models/VGAN/MNIST/D_epoch_18'
-                gen_dir = './data/models/models/VGAN/MNIST/G_epoch_18'
+		def load_models(self, gen_model, discr_model):
+				device = torch.device("cuda")
+				discr_dir = './data/models/models/VGAN/MNIST/D_epoch_18'
+				gen_dir = './data/models/models/VGAN/MNIST/G_epoch_18'
 
-                gen_model.load_state_dict(torch.load(gen_dir))
-                gen_model.to(device)
+				gen_model.load_state_dict(torch.load(gen_dir))
+				gen_model.to(device)
 
-                discr_model.load_state_dict(torch.load(discr_dir))
-                discr_model.to(device)
+				discr_model.load_state_dict(torch.load(discr_dir))
+				discr_model.to(device)
 
-                return model
+				return model
 
 	def close(self):
 		self.writer.close()
