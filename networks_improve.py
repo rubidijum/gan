@@ -28,27 +28,24 @@ class DiscriminatorNet(torch.nn.Module):
 			nn.Dropout(0.3)
 		)
 		self.minibatch_disc0 = nn.Sequential(
-		        MinibatchDiscrimination1d(2048, 1024),
+			nn.Linear(2048, 1024),
 			nn.LeakyReLU(0.2),
 			nn.Dropout(0.3)
 		)
 		self.hidden1 = nn.Sequential(
-			nn.Linear(2048+1024, 512),
+			nn.Linear(1024, 512),
 			nn.LeakyReLU(0.2),
 			nn.Dropout(0.3)
 		)
 		
 		self.hidden2 = nn.Sequential(
-			nn.Linear(512, 256),
+			nn.MinibatchDiscrimination1d(512, 256),
 			nn.LeakyReLU(0.2),
 			nn.Dropout(0.3)
 		)
 		
-		
-		# TODO: change activation to maxout as in
-		# original paper (Goodfellow)
 		self.out = nn.Sequential(
-			torch.nn.Linear(256, n_out),
+			torch.nn.Linear(512+256, n_out),
 			torch.nn.Sigmoid()
 		)
 	
@@ -108,7 +105,7 @@ class GeneratorNet(torch.nn.Module):
 		x = self.out(x)
 		return x
 		
-# change this a bit
+
 def noise(size):
 	n = Variable(torch.randn(size,100))
 	return n

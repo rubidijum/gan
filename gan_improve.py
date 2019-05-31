@@ -122,7 +122,8 @@ if __name__ == "__main__":
 			real_data = Variable(networks_improve.images_to_vectors(real_batch))
 			
 			# Generate fake data
-			fake_data = generator(networks_improve.noise(real_data.size(0))).detach()
+			# prevent G from learning in this step => .detach()
+			fake_data = generator(networks_improve.noise(real_data.size(0))).detach() 
 			
 			# Train D
 			d_error, d_pred_real, d_pred_fake = train_discriminator(d_optimizer,
@@ -162,6 +163,8 @@ if __name__ == "__main__":
 				
 				
 				# Display Images
+				# shuffle test_noise in each iteration?
+				test_noise = networks_improve.noise(num_samples)
 				test_images = networks_improve.vectors_to_images(generator(test_noise)).data.cpu()
 				
 				#for i in range(1, cols*rows):

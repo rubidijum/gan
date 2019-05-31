@@ -191,56 +191,32 @@ class CatsDataset(Dataset):
 		if self.transform:
 			img = self.transform(img)
 			
-		#print(img.shape)
+		return img
+"""
+class CarsDataset(Dataset):
+	""" Cars dataset """
+	
+	def __init__(self, root_dir, transform=None):
+		
+		
+		self.root_dir = root_dir
+		self.transform = transform
+		lista[]
+		for dirs, subdirs, fnames in os.walk(self.root_dir):
+			for fname in fnames:
+				lista.append(fname)
+		self.img_names = lista
+		
+	def __len__(self):
+		return len(self.img_names)
+		
+	def __getitem__(self, idx):
+		img_name = os.path.join(self.root_dir, self.img_names[idx])
+		
+		img = Image.open(img_name)
+		
+		if self.transform:
+			img = self.transform(img)
 			
 		return img
-		
-
-"""								
-if __name__ == "__main__":
-	
-	cats_dataset = CatsDataset("/home/aleksandar/gan/data/cats", 
-	transforms.Compose([
-								transforms.ToTensor(),
-								#transforms.Normalize((.5, .5, .5), (.5, .5, .5))
-	])
-	)
-	
-	#fig = plt.figure()
-
-
-	for i in range(len(cats_dataset)):
-		
-		sample = cats_dataset[i]
-		
-		print(sample.shape)
-		
-		ax = plt.subplot(1, 4, i + 1)
-		plt.tight_layout()
-		ax.set_title('Sample #{}'.format(i))
-		ax.axis('off')
-		
-		
-		
-		plt.imshow(sample.permute(1,2,0))
-		#plt.imshow(sample)
-		
-		if i == 3:
-			plt.show()
-			break
-	
-	dataLoad = torch.utils.data.DataLoader(cats_dataset, batch_size=10, shuffle=True)
-	
-	for i, image in enumerate(dataLoad):
-		
-		
-		if i == 3:
-			for img in image:
-				print("shp" + str(img.shape))
-				img = img.permute(1,2,0)
-				
-				plt.imshow(img)
-				
-				plt.show()
-				break
 """
