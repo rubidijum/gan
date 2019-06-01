@@ -74,7 +74,7 @@ if __name__ == "__main__":
 	cat_data = utils.CatsDataset("./data/cats", transforms.Compose(
 										[ 
 										  transforms.ToTensor(),
-										  transforms.Normalize((.5,), (.5,))
+										  transforms.Normalize([0.5,0.5,0.5], [0.5,0.5,0.5])
 										  
 										  
 										])
@@ -93,8 +93,8 @@ if __name__ == "__main__":
 	
 	#TODO: change to sgd for D in order to follow original Goodfellow paper
 	#TODO: experiment with learning rates
-	d_optimizer = optim.Adam(discriminator.parameters(), lr=0.00002)
-	g_optimizer = optim.Adam(generator.parameters(), lr=0.00002)
+	d_optimizer = optim.Adam(discriminator.parameters(), lr=0.0002)
+	g_optimizer = optim.Adam(generator.parameters(), lr=0.0002)
 	
 	# used in Goodfellow paper
 	loss = nn.BCELoss()
@@ -158,20 +158,21 @@ if __name__ == "__main__":
 				#utils.plt.legend()
 				#utils.plt.show()
 				
-				#fig = utils.plt.figure(figsize=(8,2))
-				#cols = 8
-				#rows = 2
+				fig = utils.plt.figure(figsize=(8,2))
+				cols = 8
+				rows = 2
 				
 				
 				# Display Images
 				# shuffle test_noise in each iteration?
 				test_images = networks_improve.vectors_to_images(generator(test_noise)).data.cpu()
 				
-				#for i in range(1, cols*rows):
-				#	img = test_images[i]
-				#	fig.add_subplot(rows, cols, i)
-				#	utils.plt.imshow(img.permute(1,2,0).squeeze(), cmap='gray')
-				#utils.plt.show()
+				for i in range(1, cols*rows):
+					img = test_images[i]
+					fig.add_subplot(rows, cols, i)
+					utils.plt.imshow(img.permute(1,2,0).squeeze(), cmap='gray')
+				save_location = str(epoch) + str(n_batch)
+				utils.plt.savefig("./"+save_location+".png", dpi=fig.dpi)
 					
 				
 				logger.log_images(test_images, num_test_samples, epoch, n_batch, num_batches);
