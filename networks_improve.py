@@ -40,7 +40,7 @@ class DiscriminatorNet(torch.nn.Module):
 		)
 		
 		self.minibatch_disc0 = nn.Sequential(
-			nn.MinibatchDiscrimination1d(512, 256),
+			MinibatchDiscrimination1d(512, 256),
 			nn.LeakyReLU(0.2),
 			nn.Dropout(0.3)
 		)

@@ -1,3 +1,5 @@
+#!/home/aleksandar/miniconda3/envs/ri/bin/python
+
 import utils
 import networks_improve
 import minibatch_discrimination
@@ -163,7 +165,6 @@ if __name__ == "__main__":
 				
 				# Display Images
 				# shuffle test_noise in each iteration?
-				test_noise = networks_improve.noise(num_samples)
 				test_images = networks_improve.vectors_to_images(generator(test_noise)).data.cpu()
 				
 				#for i in range(1, cols*rows):
