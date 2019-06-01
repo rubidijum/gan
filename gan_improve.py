@@ -70,7 +70,7 @@ if __name__ == "__main__":
 	#TODO: data augmentation!
 	#TODO: normalize with mean and stddev
 	cat_data = utils.CatsDataset("./data/cats", transforms.Compose(
-										[ transforms.Grayscale(num_output_channels=1),
+										[ 
 										  transforms.Resize((32,32)),		
 										  transforms.ToTensor(),
 										  transforms.Normalize((.5,), (.5,))

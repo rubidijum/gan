@@ -194,7 +194,7 @@ class CatsDataset(Dataset):
 		return img
 """
 class CarsDataset(Dataset):
-	""" Cars dataset """
+	
 	
 	def __init__(self, root_dir, transform=None):
 		

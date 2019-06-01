@@ -8,7 +8,8 @@ from torchvision import transforms, datasets
 
 IMG_WIDTH = 32
 IMG_HEIGHT = 32
-IMG_RESOLUTION = IMG_WIDTH*IMG_HEIGHT
+NUM_CHANNELS = 3
+IMG_RESOLUTION = IMG_WIDTH*IMG_HEIGHT*NUM_CHANNELS
 
 class DiscriminatorNet(torch.nn.Module):
 	
@@ -27,18 +28,18 @@ class DiscriminatorNet(torch.nn.Module):
 			nn.LeakyReLU(0.2),
 			nn.Dropout(0.3)
 		)
-		self.minibatch_disc0 = nn.Sequential(
+		self.hidden1 = nn.Sequential(
 			nn.Linear(2048, 1024),
 			nn.LeakyReLU(0.2),
 			nn.Dropout(0.3)
 		)
-		self.hidden1 = nn.Sequential(
+		self.hidden2 = nn.Sequential(
 			nn.Linear(1024, 512),
 			nn.LeakyReLU(0.2),
 			nn.Dropout(0.3)
 		)
 		
-		self.hidden2 = nn.Sequential(
+		self.minibatch_disc0 = nn.Sequential(
 			nn.MinibatchDiscrimination1d(512, 256),
 			nn.LeakyReLU(0.2),
 			nn.Dropout(0.3)
@@ -51,9 +52,9 @@ class DiscriminatorNet(torch.nn.Module):
 	
 	def forward(self, x):
 		x = self.hidden0(x) 
-		x = self.minibatch_disc0(x) 
 		x = self.hidden1(x) 
-		x = self.hidden2(x)  
+		x = self.hidden2(x) 
+		x = self.minibatch_disc0(x) 
 		x = self.out(x) 
 		return x
 		
@@ -61,7 +62,7 @@ def images_to_vectors(images):
 	return images.view(images.size(0), IMG_RESOLUTION)
 	
 def vectors_to_images(vectors):
-	return vectors.view(vectors.size(0), 1, IMG_WIDTH, IMG_HEIGHT)
+	return vectors.view(vectors.size(0), NUM_CHANNELS, IMG_WIDTH, IMG_HEIGHT)
 	
 class GeneratorNet(torch.nn.Module):
 	
@@ -91,7 +92,6 @@ class GeneratorNet(torch.nn.Module):
 			nn.LeakyReLU(0.2)
 		)
 		
-		# TODO: change activation
 		self.out = nn.Sequential(
 			nn.Linear(2048, n_out),
 			nn.Tanh()
