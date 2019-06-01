@@ -6,8 +6,8 @@ from torch import nn, optim
 from torch.autograd.variable import Variable
 from torchvision import transforms, datasets
 
-IMG_WIDTH = 32
-IMG_HEIGHT = 32
+IMG_WIDTH = 64
+IMG_HEIGHT = 64
 NUM_CHANNELS = 3
 IMG_RESOLUTION = IMG_WIDTH*IMG_HEIGHT*NUM_CHANNELS
 
