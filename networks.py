@@ -7,120 +7,110 @@ from torchvision import transforms, datasets
 
 IMG_WIDTH = 64
 IMG_HEIGHT = 64
-IMG_RESOLUTION = IMG_WIDTH*IMG_HEIGHT
+NUM_CHANNELS = 3
+IMG_RESOLUTION = IMG_WIDTH*IMG_HEIGHT*NUM_CHANNELS
 
 class DiscriminatorNet(torch.nn.Module):
-	
-	"""
-		Architecture description 
-	"""
-	
-	def __init__(self):
-		super().__init__()
-		
-		n_features = IMG_RESOLUTION
-		n_out = 1
-		
-                """
-                self.conv1 = torch.nn.Conv2d(in_channels=3, out_channels=18, kernel=3, stride=1, padding=1)
-                self.pool = torch.nn.MaxPool2d(kernel_size=2, stride=2, padding=0)
+  
+  """
+    Architecture description 
+  """
+  
+  def __init__(self):
+    super().__init__()
+    
+    n_features = IMG_RESOLUTION
+    n_out = 1
+    
+    self.hidden0 = nn.Sequential(
+      nn.Linear(n_features, 2048),
+      nn.LeakyReLU(0.2),
+      nn.Dropout(0.3)
+    )
+    self.hidden1 = nn.Sequential(
+      nn.Linear(2048, 1024),
+      nn.LeakyReLU(0.2),
+      nn.Dropout(0.3)
+    )
+    self.hidden2 = nn.Sequential(
+      nn.Linear(1024, 512),
+      nn.LeakyReLU(0.2),
+      nn.Dropout(0.3)
+    )
+    
+    self.hidden3 = nn.Sequential(
+      nn.Linear(512, 256),
+      nn.LeakyReLU(0.2),
+      nn.Dropout(0.3)
+    )
+    
+    
+    
 
-                #brojke jos moraju da se nameste
-                self.fc1 = torch.nn.Linear(18 * 16 * 16, 64)
-
-                # 2. argument je broj klasa
-                self.fc2 = torch.nn.Linear(64, 2)
-                """
-
-		self.hidden0 = nn.Sequential(
-			nn.Linear(n_features, 2048),
-			nn.LeakyReLU(0.2),
-			nn.Dropout(0.3)
-		)
-		self.hidden1 = nn.Sequential(
-			nn.Linear(2048, 1024),
-			nn.LeakyReLU(0.2),
-			nn.Dropout(0.3)
-		)
-		self.hidden2 = nn.Sequential(
-			nn.Linear(1024, 512),
-			nn.LeakyReLU(0.2),
-			nn.Dropout(0.3)
-		)
-		
-		self.hidden3 = nn.Sequential(
-			nn.Linear(512, 256),
-			nn.LeakyReLU(0.2),
-			nn.Dropout(0.3)
-		)
-		
-		
-		# TODO: change activation to maxout as in
-		# original paper (Goodfellow)
-		self.out = nn.Sequential(
-			torch.nn.Linear(256, n_out),
-			torch.nn.Sigmoid()
-		)
-	
-	def forward(self, x):
-		x = self.hidden0(x) 
-		x = self.hidden1(x) 
-		x = self.hidden2(x) 
-		x = self.hidden3(x)  
-		x = self.out(x) 
-		return x
-		
+    self.out = nn.Sequential(
+      torch.nn.Linear(256, n_out),
+      torch.nn.Sigmoid()
+    )
+  
+  def forward(self, x):
+    x = self.hidden0(x) 
+    x = self.hidden1(x) 
+    x = self.hidden2(x) 
+    x = self.hidden3(x)  
+    x = self.out(x) 
+    return x
+    
 def images_to_vectors(images):
-	return images.view(images.size(0), IMG_RESOLUTION)
-	
+  return images.view(images.size(0), IMG_RESOLUTION)
+  
 def vectors_to_images(vectors):
-	return vectors.view(vectors.size(0), 1, IMG_WIDTH, IMG_HEIGHT)
-	
+  return vectors.view(vectors.size(0), NUM_CHANNELS, IMG_WIDTH, IMG_HEIGHT)
+  
 class GeneratorNet(torch.nn.Module):
-	
-	
-	def __init__(self):
-		super().__init__()
-		n_features = 100
-		n_out = IMG_RESOLUTION
-		
-		self.hidden0 = nn.Sequential(
-			nn.Linear(n_features, 256),
-			nn.LeakyReLU(0.2)
-		)
-		
-		self.hidden1 = nn.Sequential(
-			nn.Linear(256, 512),
-			nn.LeakyReLU(0.2)
-		)
-		
-		self.hidden2 = nn.Sequential(
-			nn.Linear(512, 1024),
-			nn.LeakyReLU(0.2)
-		)
-		
-		self.hidden3 = nn.Sequential(
-			nn.Linear(1024, 2048),
-			nn.LeakyReLU(0.2)
-		)
-		
-		# TODO: change activation
-		self.out = nn.Sequential(
-			nn.Linear(2048, n_out),
-			nn.Tanh()
-		)
-		
-	def forward(self, x):
-		x = self.hidden0(x)
-		x = self.hidden1(x)
-		x = self.hidden2(x)
-		x = self.hidden3(x)
-		x = self.out(x)
-		return x
-		
+  
+  
+  def __init__(self):
+    super().__init__()
+    n_features = 100
+    n_out = IMG_RESOLUTION
+    
+    self.hidden0 = nn.Sequential(
+      nn.Linear(n_features, 256),
+      nn.LeakyReLU(0.2)
+    )
+    
+    self.hidden1 = nn.Sequential(
+      nn.Linear(256, 512),
+      nn.LeakyReLU(0.2)
+    )
+    
+    self.hidden2 = nn.Sequential(
+      nn.Linear(512, 1024),
+      nn.LeakyReLU(0.2)
+    )
+    
+    self.hidden3 = nn.Sequential(
+      nn.Linear(1024, 2048),
+      nn.LeakyReLU(0.2)
+    )
+    
+    # TODO: change activation
+    self.out = nn.Sequential(
+      nn.Linear(2048, n_out),
+      nn.Tanh()
+    )
+    
+  def forward(self, x):
+    x = self.hidden0(x)
+    x = self.hidden1(x)
+    x = self.hidden2(x)
+    x = self.hidden3(x)
+    x = self.out(x)
+    return x
+    
 # change this a bit
 def noise(size):
-	n = Variable(torch.randn(size,100))
-	return n
-	
+  n = Variable(torch.randn(size,100))
+  return n
+  
 
