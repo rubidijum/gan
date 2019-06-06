@@ -259,7 +259,9 @@ for epoch in range(num_epochs):
                 fake = netG(fixed_noise).detach().cpu()
             img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
             logger.log_images(fake, 16, epoch, i, batch_size);
-
+            
+		
+		logger.save_models(netG, netD, epoch)
         iters += 1
 """
 # Plotting
