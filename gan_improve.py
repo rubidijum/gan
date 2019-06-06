@@ -1,6 +1,6 @@
 #!/home/aleksandar/miniconda3/envs/ri/bin/python
 
-from .. import utils
+import utils
 import networks_improve
 import minibatch_discrimination
 
