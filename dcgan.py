@@ -1,6 +1,7 @@
 from __future__ import print_function
 
 #%matplotlib inline
+import utils
 import argparse
 import os
 import random
@@ -16,6 +17,7 @@ import torchvision.utils as vutils
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
+from IPython.display import HTML
 
 seed = 42
 
@@ -34,7 +36,7 @@ batch_size = 128
 image_size = 64
 
 # number of channels in the training images
-num_ch = 1
+num_ch = 3
 
 # size of generator input
 z_size = 100
@@ -57,10 +59,10 @@ ngpu = 1
 
 dataset = dset.ImageFolder(root=dataroot,
                            transform=transforms.Compose([
-                                transforms.Grayscale(num_output_channels=1),
+                                #transforms.Grayscale(num_output_channels=1),
                                 transforms.Resize((image_size, image_size)),
                                 transforms.ToTensor(),
-                                transforms.Normalize((.5,), (.5,))
+                                transforms.Normalize((.5,.5,.5), (.5,.5,.5))
                             ]))
 
 dataloader = torch.utils.data.DataLoader(dataset, batch_size=batch_size,
@@ -171,67 +173,95 @@ G_losses = []
 D_losses = []
 iters = 0
 
+logger = utils.Logger(model_name="DCGAN", data_name="Cats")
+save_path = os.mkdir("./images/")
+
 print("Starting training...")
 
 for epoch in range(num_epochs):
     for i, data in enumerate(dataloader, 0):
+        
+        # Update D
+        # maximize log(D(x)) + log(1-D(G(z)))
+
+        # train with all-real batch
         netD.zero_grad()
 
+        # format batch
         real_cpu = data[0].to(device)
         b_size = real_cpu.size(0)
         label = torch.full((b_size,), real_label, device=device)
 
+        # forward pass through the Discriminator
         output = netD(real_cpu).view(-1)
 
+        # calculate loss on all-real batch 
         errD_real = criterion(output, label)
+        # calculate gradients for D in backward pass
         errD_real.backward()
-
         D_x = output.mean().item()
 
+        # generator batch of vectors
         noise = torch.randn(b_size, z_size, 1, 1, device=device)
 
+        # generate all-fake batch with Generator
         fake = netG(noise)
+        # this batch is fake for the Discriminator 
         label.fill_(fake_label)
 
+        # forward pass all-fake batch through the Discriminator
         output = netD(fake.detach()).view(-1)
 
+        # calculate Discriminator's loss on the all-fake batch
         errD_fake = criterion(output, label)
+        # calculate gradients for D on the all-fake batch
         errD_fake.backward()
-
         D_G_z1 = output.mean().item()
 
+        # add the gradients from the all-real and the all-fake batch
         errD = errD_real + errD_fake
 
+        # update D with the Adam optimizer
         optimizerD.step()
 
 
+        # Update Generator's network 
+        # maximize log(D(G(z))
         netG.zero_grad()
+        # fake label is real for the Generator
         label.fill_(real_label)
 
+        # perform another forward pass on the updated Discriminator
         output = netD(fake).view(-1)
 
+        # calculate Generator's loss based on the Discriminator's output
         errG = criterion(output, label)
+        # and then calculate gradients for the Generator
         errG.backward()
-
         D_G_z2 = output.mean().item()
 
+        # update Generator with the Adam optimizer
         optimizerG.step()
+        
+        logger.log(errD, errG, epoch, i, len(dataloader))
 
         if i%50 == 0:
             print('[%d/%d][%d/%d]\tLoss_D: %.4f\tLoss_G: %.4f\tD(x): %.4f\tD(G(z)): %.4f / %.4f'
                     % (epoch, num_epochs, i, len(dataloader),
                         errD.item(), errG.item(), D_x, D_G_z1, D_G_z2))
+            
 
         G_losses.append(errG.item())
         D_losses.append(errD.item())
 
-        if (iters % 500 == 0) or ((epoch == num_epochs-1) and (i == len(dataloader)-1)):
+        if (iters % 50 == 0) or ((epoch == num_epochs-1) and (i == len(dataloader)-1)):
             with torch.no_grad():
                 fake = netG(fixed_noise).detach().cpu()
             img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
+            logger.log_images(fake, 16, epoch, i, batch_size);
 
         iters += 1
-
+"""
 # Plotting
 plt.figure(figsize=(10,5))
 plt.title("Generator and Discriminator Loss During Training")
@@ -267,3 +297,4 @@ plt.axis("off")
 plt.title("Fake Images")
 plt.imshow(np.transpose(img_list[-1],(1,2,0)))
 plt.show()
+"""
