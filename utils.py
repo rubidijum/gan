@@ -130,18 +130,18 @@ class Logger:
 		torch.save(discriminator.state_dict(),
 				   '{}/D_epoch_{}'.format(out_dir, epoch))
 
-		def load_models(self, gen_model, discr_model):
-				device = torch.device("cuda")
-				discr_dir = './data/models/models/VGAN/MNIST/D_epoch_18'
-				gen_dir = './data/models/models/VGAN/MNIST/G_epoch_18'
-
-				gen_model.load_state_dict(torch.load(gen_dir))
-				gen_model.to(device)
-
-				discr_model.load_state_dict(torch.load(discr_dir))
-				discr_model.to(device)
-
-				return model
+	def load_G(self, model_name, data_name, epoch, gen_model):
+		
+		device = torch.device("cpu")
+		if(torch.cuda.is_available()):
+			device = torch.device("cuda")
+		
+		
+		gen_dir = './data/models/{}/{}/G_epoch_{}'.format(model_name, data_name, epoch)
+		print("Loading model: " + gen_dir)
+		gen_model.load_state_dict(torch.load(gen_dir))
+		gen_model.to(device)
+		
 
 	def close(self):
 		self.writer.close()
