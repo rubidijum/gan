@@ -1,3 +1,4 @@
+#!/home/aleksandar/miniconda3/envs/ri/bin/python
 from __future__ import print_function
 
 #%matplotlib inline
@@ -47,7 +48,7 @@ gen_feat_map_size = 64
 # size of feature maps in discriminator
 discr_feat_map_size = 64
 
-num_epochs = 5
+num_epochs = 100
 
 # learning rate for optimizers 
 learning_rate = 0.0002
@@ -174,7 +175,6 @@ D_losses = []
 iters = 0
 
 logger = utils.Logger(model_name="DCGAN", data_name="Cats")
-save_path = os.mkdir("./images/")
 
 print("Starting training...")
 
@@ -260,8 +260,9 @@ for epoch in range(num_epochs):
             img_list.append(vutils.make_grid(fake, padding=2, normalize=True))
             logger.log_images(fake, 16, epoch, i, batch_size);
             
-		
-		logger.save_models(netG, netD, epoch)
+    
+        print("Saving models...");
+        logger.save_models(netG, netD, epoch)
         iters += 1
 """
 # Plotting
