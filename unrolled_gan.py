@@ -55,7 +55,7 @@ def train_generator(fake_data, G_optimizer, loss=None, D_optimizer=None, unrolle
 			return
 		# save discriminator copy - we don't want to train this D, 
 		# it's only used for G's training -> we will restore it later
-		unrolled_D = copy.deepcopy(discriminator)
+		unrolled_D = copy.deepcopy(D)
 		for i in range(unrolled_steps):
 			train_discriminator(D_optimizer, real_data, fake_data, unrolled_D, generator, loss, unrolled=True)
 			# train 'unrolled' discriminator for unrolled_steps 
