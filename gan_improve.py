@@ -59,7 +59,7 @@ def train_generator(optimizer, fake_data):
         prediction = discriminator(fake_data)
         
         # we want data to be classified as real
-        error = loss(prediction, Variable(0.9*torch.ones(real_data.size(0))))
+        error = loss(prediction, real_data_labels(real_data.size(0)))
         error.backward()
         
         optimizer.step()
@@ -127,8 +127,7 @@ if __name__ == "__main__":
                         fake_data = generator(networks_improve.noise(real_data.size(0))).detach() 
                         
                         # Train D
-                        d_error, d_pred_real, d_pred_fake = train_discriminator(d_optimizer,
-                                                                                                                                        real_data, fake_data, discriminator, generator, loss)
+                        d_error, d_pred_real, d_pred_fake = train_discriminator(real_data, fake_data, discriminator, generator, loss)
                         
                         discriminator_loss.append(d_error)
 
