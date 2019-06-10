@@ -81,7 +81,7 @@ if __name__ == "__main__":
 												
 	data_loader = torch.utils.data.DataLoader(cat_data, batch_size=batch_size, shuffle=True)
 	
-	batch_size = len(data_loader)
+	num_batches = len(data_loader)
 	
 	D = unrolled_networks.DiscriminatorNet()
 	G = unrolled_networks.GeneratorNet()
